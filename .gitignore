@@ -1,0 +1,6 @@
+# Runtime cache written by the plugin; keep it out of version control.
+profile-cache.json
+*.tmp
+*.tgz
+node_modules/
+.DS_Store

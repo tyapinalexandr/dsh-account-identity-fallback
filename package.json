@@ -1,0 +1,60 @@
+{
+  "name": "@tyapinalexandr/dsh-account-identity-fallback",
+  "version": "0.2.4",
+  "description": "Keeps the DeepSeek account name and avatar visible when the Platform profile endpoint is blocked, with an in-app name/avatar editor",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "icon.svg",
+    "locale/*.json"
+  ],
+  "icon": "./icon.svg",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek",
+    "account",
+    "profile",
+    "fallback"
+  ],
+  "author": "tyapinalexandr",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.0"
+  },
+  "engines": {
+    "dsh": ">=0.2.1-rc.5 <0.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tyapinalexandr/dsh-account-identity-fallback.git"
+  },
+  "homepage": "https://github.com/tyapinalexandr/dsh-account-identity-fallback#readme",
+  "bugs": {
+    "url": "https://github.com/tyapinalexandr/dsh-account-identity-fallback/issues"
+  }
+}

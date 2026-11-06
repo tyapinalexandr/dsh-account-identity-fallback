@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Account identity fallback",
+    "description": "Keeps the DeepSeek account name and avatar visible when the Platform profile endpoint is blocked."
+  }
+}

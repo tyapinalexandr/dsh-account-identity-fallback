@@ -1,0 +1,21 @@
+# Bundle layer: insert the fallback plugin row.
+#
+# The identity itself (name / avatar / contact) is per-deployment data, so this
+# layer is intentionally empty. Override it in the profile's own
+# cordis.patch.yml, which is applied after every bundle layer:
+#
+#   - id: account-identity-fallback
+#     config:
+#       name: 'Your display name'
+#       avatarUrl: 'https://static.deepseek.com/user-avatar/<avatar-id>'
+#       contact: ''
+#       id: ''
+#
+- insert:
+    - id: account-identity-fallback
+      name: '@tyapinalexandr/dsh-account-identity-fallback'
+      config:
+        name: ''
+        contact: ''
+        avatarUrl: ''
+        id: ''
