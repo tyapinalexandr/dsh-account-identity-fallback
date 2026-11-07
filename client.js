@@ -17,7 +17,7 @@ window.__ModuleLoader__.load({
 		const PACKAGE = "@tyapinalexandr/dsh-account-identity-fallback";
 		const ROW_ID = "account-identity-fallback";
 		const FIELD_NAMES = ["name", "avatarUrl"];
-		const MAX_AVATAR_BYTES = 512 * 1024;
+		const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 
 		const en = {
 			summary: "Set the account name and avatar shown when the Platform profile is unavailable.",
@@ -28,7 +28,7 @@ window.__ModuleLoader__.load({
 			nameLabel: "Account name",
 			nameHint: "Shown in the account menu and Settings. Leave empty to use the last known Platform profile.",
 			avatarLabel: "Avatar",
-			avatarHint: "Paste an image URL, or choose a local image file (up to 512 KB; it is embedded in the profile configuration). Leave empty to use the last known Platform avatar.",
+			avatarHint: "Paste an image URL, or choose a local image file. The file is compressed, stored in the plugin data directory, and only a short reference is saved in the profile. Leave empty to use the last known Platform avatar.",
 			avatarChoose: "Choose image…",
 			replaceImage: "Replace image…",
 			useLink: "Use a link instead",
@@ -40,7 +40,7 @@ window.__ModuleLoader__.load({
 			noChanges: "Nothing to save",
 			failed: "Could not save the settings",
 			notImage: "Choose an image file",
-			tooLarge: "The image is larger than 512 KB",
+			tooLarge: "The image is larger than 15 MB",
 			readFailed: "Could not read the image file",
 			cacheHint: "Empty fields fall back to the last known Platform profile, then to the built-in account label.",
 		};
@@ -54,7 +54,7 @@ window.__ModuleLoader__.load({
 			nameLabel: "Имя в аккаунте",
 			nameHint: "Показывается в меню аккаунта и настройках. Пусто — использовать последний известный профиль платформы.",
 			avatarLabel: "Аватар",
-			avatarHint: "Вставьте ссылку на изображение или выберите файл (до 512 КБ; он сохраняется внутри конфигурации профиля). Пусто — использовать последний известный аватар платформы.",
+			avatarHint: "Вставьте ссылку на изображение или выберите файл. Он сжимается, сохраняется в папке данных плагина, а в профиль пишется только короткая ссылка. Пусто — использовать последний известный аватар платформы.",
 			avatarChoose: "Выбрать изображение…",
 			replaceImage: "Заменить изображение…",
 			useLink: "Вместо файла — ссылка",
@@ -66,7 +66,7 @@ window.__ModuleLoader__.load({
 			noChanges: "Нечего сохранять",
 			failed: "Не удалось сохранить настройки",
 			notImage: "Выберите файл изображения",
-			tooLarge: "Изображение больше 512 КБ",
+			tooLarge: "Изображение больше 15 МБ",
 			readFailed: "Не удалось прочитать файл изображения",
 			cacheHint: "Пустые поля берут последний известный профиль платформы, а затем встроенную подпись аккаунта.",
 		};
@@ -117,9 +117,17 @@ window.__ModuleLoader__.load({
 			return draft;
 		}
 
-		/** Whether a value is an embedded image URL. */
-		function isDataUrl(value) {
+		const AVATAR_REF_PREFIX = "dsh-file:";
+		const AVATAR_ROUTE = "/account-identity-fallback/avatar";
+
+		/** Whether a value is an embedded (legacy, inline) image URL. */
+		function isInlineAvatar(value) {
 			return typeof value === "string" && value.startsWith("data:");
+		}
+
+		/** Whether a value names a stored avatar file. */
+		function isStoredAvatar(value) {
+			return typeof value === "string" && value.startsWith(AVATAR_REF_PREFIX);
 		}
 
 		/** Approximate decoded size in KB of a data: URL. */
@@ -128,6 +136,61 @@ window.__ModuleLoader__.load({
 			const payload = comma === -1 ? "" : value.slice(comma + 1);
 			const padding = payload.endsWith("==") ? 2 : payload.endsWith("=") ? 1 : 0;
 			return Math.max(1, Math.round((payload.length * 3) / 4 - padding) / 1024);
+		}
+
+		/** URL the browser can use as the avatar preview. */
+		function avatarPreviewSource(value) {
+			if (value === "") return undefined;
+			if (isStoredAvatar(value)) return `${AVATAR_ROUTE}/${encodeURIComponent(value.slice(AVATAR_REF_PREFIX.length))}`;
+			return value;
+		}
+
+		/** Downscale the chosen image to a small avatar and re-encode it. */
+		function compressImage(dataUrl) {
+			return new Promise((resolve) => {
+				if (typeof Image !== "function" || typeof document === "undefined") {
+					resolve(dataUrl);
+					return;
+				}
+				const image = new Image();
+				image.onload = () => {
+					try {
+						const scale = Math.min(1, 320 / Math.max(image.width, image.height));
+						const width = Math.max(1, Math.round(image.width * scale));
+						const height = Math.max(1, Math.round(image.height * scale));
+						const canvas = document.createElement("canvas");
+						canvas.width = width;
+						canvas.height = height;
+						const context = canvas.getContext("2d");
+						if (context === null) {
+							resolve(dataUrl);
+							return;
+						}
+						context.drawImage(image, 0, 0, width, height);
+						const encoded = canvas.toDataURL("image/webp", 0.85);
+						resolve(encoded && encoded !== "data:," ? encoded : canvas.toDataURL("image/jpeg", 0.85));
+					} catch (_error) {
+						resolve(dataUrl);
+					}
+				};
+				image.onerror = () => resolve(dataUrl);
+				image.src = dataUrl;
+			});
+		}
+
+		/** Store the compressed image on the Host and return its reference. */
+		async function uploadAvatarData(dataUrl) {
+			const response = await fetch(AVATAR_ROUTE, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ data: dataUrl }),
+			});
+			if (!response.ok) throw new Error(`avatar upload failed: ${response.status}`);
+			const body = await response.json();
+			if (typeof body?.ref !== "string" || !body.ref.startsWith(AVATAR_REF_PREFIX)) {
+				throw new Error("avatar upload returned no reference");
+			}
+			return body.ref;
 		}
 
 		/** Render one label + control + hint block. */
@@ -187,13 +250,21 @@ window.__ModuleLoader__.load({
 					setNotice({ ok: false, text: t("notImage") });
 					return;
 				}
-				if (file.size > MAX_AVATAR_BYTES) {
+				if (file.size > MAX_SOURCE_BYTES) {
 					setNotice({ ok: false, text: t("tooLarge") });
 					return;
 				}
 				const reader = new FileReader();
-				reader.onload = () => {
-					setDraft((previous) => ({ ...previous, avatarUrl: String(reader.result || "") }));
+				reader.onload = async () => {
+					const original = String(reader.result || "");
+					const compressed = await compressImage(original);
+					try {
+						const ref = await uploadAvatarData(compressed);
+						setDraft((previous) => ({ ...previous, avatarUrl: ref }));
+					} catch (_error) {
+						// Older Host or non-Web carrier: keep the image inline.
+						setDraft((previous) => ({ ...previous, avatarUrl: compressed }));
+					}
 					setNotice(null);
 				};
 				reader.onerror = () => setNotice({ ok: false, text: t("readFailed") });
@@ -231,7 +302,7 @@ window.__ModuleLoader__.load({
 				: h("img", {
 					key: "preview",
 					style: styles.avatar,
-					src: draft.avatarUrl,
+					src: avatarPreviewSource(draft.avatarUrl),
 					alt: t("avatarLabel"),
 					referrerPolicy: "no-referrer",
 					onError: (event) => { event.currentTarget.style.visibility = "hidden"; },
@@ -252,10 +323,12 @@ window.__ModuleLoader__.load({
 					})),
 					fieldBlock(t("avatarLabel"), t("avatarHint"), h("div", { style: styles.avatarRow, key: "avatar" }, [
 						avatarPreview,
-						isDataUrl(draft.avatarUrl)
+						(isStoredAvatar(draft.avatarUrl) || isInlineAvatar(draft.avatarUrl))
 							? h("span", { key: "uploaded", style: styles.uploaded }, [
 								h("span", { key: "label" }, t("uploadedImage")),
-								h("span", { key: "size", style: styles.uploadedSize }, `${dataUrlSizeKb(draft.avatarUrl)} KB`),
+								isInlineAvatar(draft.avatarUrl)
+									? h("span", { key: "size", style: styles.uploadedSize }, `${dataUrlSizeKb(draft.avatarUrl)} KB`)
+									: null,
 							])
 							: h("input", {
 								key: "avatar-url",
@@ -280,8 +353,8 @@ window.__ModuleLoader__.load({
 							style: styles.button,
 							disabled: !writable || saving,
 							onClick: chooseFile,
-						}, t(isDataUrl(draft.avatarUrl) ? "replaceImage" : "avatarChoose")),
-						isDataUrl(draft.avatarUrl) ? h("button", {
+						}, t((isStoredAvatar(draft.avatarUrl) || isInlineAvatar(draft.avatarUrl)) ? "replaceImage" : "avatarChoose")),
+						(isStoredAvatar(draft.avatarUrl) || isInlineAvatar(draft.avatarUrl)) ? h("button", {
 							key: "use-link",
 							type: "button",
 							style: styles.button,

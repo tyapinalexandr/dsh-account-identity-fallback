@@ -27,8 +27,9 @@ loads.
 ## Configure
 
 Plugins → Installed plugins → the plugin's page: set **Account name** and
-**Avatar** (image URL or a local file up to 512 KB, stored in the profile
-configuration), then **Save**. Saved fields apply immediately without a restart
+**Avatar** (an image URL, or a local file that is downscaled and stored under
+`$DSH_HOME/account-identity-fallback/avatars`; the profile keeps only a short
+`dsh-file:` reference), then **Save**. Saved fields apply immediately without a restart
 and take priority over the cached profile; empty fields use the cached value.
 
 The same two fields can be set in the profile's `cordis.patch.yml` (`name`,
@@ -39,6 +40,8 @@ The same two fields can be set in the profile's `cordis.patch.yml` (`name`,
 `$DSH_HOME/cache/account-identity-fallback/profile-cache.json`
 (`~/.dsh/cache/...` by default). Delete it to fall back to the configured
 identity.
+
+Uploaded avatar files: `$DSH_HOME/account-identity-fallback/avatars/`.
 
 ## Uninstall
 
@@ -79,8 +82,9 @@ dsh plugin --profile <профиль> add @tyapinalexandr/dsh-account-identity-f
 ### Настройка
 
 **Plugins → Installed plugins** → страница плагина: задайте **Имя в аккаунте**
-и **Аватар** (ссылка или локальный файл до 512 КБ, сохраняется в конфигурации
-профиля), затем **Сохранить**. Сохранённые поля применяются сразу, без
+и **Аватар** (ссылка или локальный файл: он уменьшается и сохраняется в
+`$DSH_HOME/account-identity-fallback/avatars`, а в профиле остаётся короткая
+ссылка `dsh-file:`), затем **Сохранить**. Сохранённые поля применяются сразу, без
 перезапуска, и имеют приоритет над кешем; пустые поля используют кеш.
 
 Те же два поля можно задать в `cordis.patch.yml` профиля (`name`,
@@ -90,6 +94,8 @@ dsh plugin --profile <профиль> add @tyapinalexandr/dsh-account-identity-f
 
 `$DSH_HOME/cache/account-identity-fallback/profile-cache.json` (по умолчанию
 `~/.dsh/cache/...`). Удалите файл, чтобы вернуться к значениям из настроек.
+
+Файлы загруженных аватаров: `$DSH_HOME/account-identity-fallback/avatars/`.
 
 ### Удаление
 
