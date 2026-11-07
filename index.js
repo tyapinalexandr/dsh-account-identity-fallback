@@ -40,14 +40,16 @@ export const Config = Schema.object({
     .description('Account name shown in the account menu and Settings. Empty falls back to the last known profile.'),
   contact: Schema.string()
     .default('')
-    .description('Advanced (YAML only): contact line shown in Settings → Account under the name.'),
+    .volatile()
+    .description('Optional contact line shown in Settings → Account under the name (masked e-mail or phone).'),
   avatarUrl: Schema.string()
     .default('')
     .volatile()
     .description('Avatar URL (https:), a dsh-file: reference to a stored upload, or a legacy data: URL. Empty falls back to the last known profile.'),
   id: Schema.string()
     .default('')
-    .description('Advanced (YAML only): account id used to prefill the Feedback form.'),
+    .volatile()
+    .description('Optional account id used to prefill the Feedback form.'),
 })
 
 const LOG_PREFIX = '[account-identity-fallback]'

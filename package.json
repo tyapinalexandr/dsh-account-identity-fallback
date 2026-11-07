@@ -1,6 +1,6 @@
 {
   "name": "@tyapinalexandr/dsh-account-identity-fallback",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Keeps the DeepSeek account name and avatar visible when the Platform profile endpoint is blocked, with an in-app name/avatar editor",
   "type": "module",
   "main": "index.js",

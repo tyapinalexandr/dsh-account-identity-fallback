@@ -26,14 +26,21 @@ loads.
 
 ## Configure
 
-Plugins → Installed plugins → the plugin's page: set **Account name** and
-**Avatar** (an image URL, or a local file that is downscaled and stored under
-`$DSH_HOME/account-identity-fallback/avatars`; the profile keeps only a short
-`dsh-file:` reference), then **Save**. Saved fields apply immediately without a restart
-and take priority over the cached profile; empty fields use the cached value.
+Plugins → Installed plugins → the plugin's page: set any of
 
-The same two fields can be set in the profile's `cordis.patch.yml` (`name`,
-`avatarUrl`).
+- **Account name** — shown in the account menu and Settings;
+- **Contact** (optional) — shown under the name in Settings → Account instead of
+  the built-in "Account details are not available yet." placeholder;
+- **Avatar** — an image URL, or a local file that is downscaled and stored under
+  `$DSH_HOME/account-identity-fallback/avatars`; the profile keeps only a short
+  `dsh-file:` reference;
+- **Account id** (optional) — used to prefill the Feedback form.
+
+then **Save**. Saved fields apply immediately without a restart and take
+priority over the cached profile; empty fields use the cached value.
+
+The same fields can be set in the profile's `cordis.patch.yml` (`name`,
+`contact`, `avatarUrl`, `id`).
 
 ## Cache
 
@@ -81,14 +88,21 @@ dsh plugin --profile <профиль> add @tyapinalexandr/dsh-account-identity-f
 
 ### Настройка
 
-**Plugins → Installed plugins** → страница плагина: задайте **Имя в аккаунте**
-и **Аватар** (ссылка или локальный файл: он уменьшается и сохраняется в
-`$DSH_HOME/account-identity-fallback/avatars`, а в профиле остаётся короткая
-ссылка `dsh-file:`), затем **Сохранить**. Сохранённые поля применяются сразу, без
-перезапуска, и имеют приоритет над кешем; пустые поля используют кеш.
+**Plugins → Installed plugins** → страница плагина: заполните нужные поля —
 
-Те же два поля можно задать в `cordis.patch.yml` профиля (`name`,
-`avatarUrl`).
+- **Имя в аккаунте** — показывается в меню аккаунта и настройках;
+- **Контакт** (необязательно) — показывается под именем в Settings → Account
+  вместо встроенной заглушки «Детали аккаунта пока недоступны.»;
+- **Аватар** — ссылка или локальный файл: он уменьшается и сохраняется в
+  `$DSH_HOME/account-identity-fallback/avatars`, а в профиле остаётся короткая
+  ссылка `dsh-file:`;
+- **ID аккаунта** (необязательно) — для предзаполнения формы Feedback.
+
+затем **Сохранить**. Сохранённые поля применяются сразу, без перезапуска, и
+имеют приоритет над кешем; пустые поля используют кеш.
+
+Те же поля можно задать в `cordis.patch.yml` профиля (`name`, `contact`,
+`avatarUrl`, `id`).
 
 ### Кеш
 

@@ -16,7 +16,7 @@ window.__ModuleLoader__.load({
 		const NS = "accountIdentityFallback";
 		const PACKAGE = "@tyapinalexandr/dsh-account-identity-fallback";
 		const ROW_ID = "account-identity-fallback";
-		const FIELD_NAMES = ["name", "avatarUrl"];
+		const FIELD_NAMES = ["name", "contact", "avatarUrl", "id"];
 		const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 
 		const en = {
@@ -27,6 +27,8 @@ window.__ModuleLoader__.load({
 			readOnly: "This profile does not accept configuration writes.",
 			nameLabel: "Account name",
 			nameHint: "Shown in the account menu and Settings. Leave empty to use the last known Platform profile.",
+			contactLabel: "Contact (optional)",
+			contactHint: "Shown under the name in Settings → Account instead of the built-in placeholder. Leave empty to keep the placeholder.",
 			avatarLabel: "Avatar",
 			avatarHint: "Paste an image URL, or choose a local image file. The file is compressed, stored in the plugin data directory, and only a short reference is saved in the profile. Leave empty to use the last known Platform avatar.",
 			avatarChoose: "Choose image…",
@@ -34,6 +36,8 @@ window.__ModuleLoader__.load({
 			useLink: "Use a link instead",
 			uploadedImage: "Uploaded image",
 			avatarClear: "Remove image",
+			idLabel: "Account id (optional)",
+			idHint: "Used to prefill the Feedback form. Usually left empty.",
 			save: "Save",
 			saving: "Saving…",
 			saved: "Saved",
@@ -53,6 +57,8 @@ window.__ModuleLoader__.load({
 			readOnly: "Этот профиль не принимает записи настроек.",
 			nameLabel: "Имя в аккаунте",
 			nameHint: "Показывается в меню аккаунта и настройках. Пусто — использовать последний известный профиль платформы.",
+			contactLabel: "Контакт (необязательно)",
+			contactHint: "Показывается под именем в Settings → Account вместо встроенной заглушки. Пусто — оставить заглушку.",
 			avatarLabel: "Аватар",
 			avatarHint: "Вставьте ссылку на изображение или выберите файл. Он сжимается, сохраняется в папке данных плагина, а в профиль пишется только короткая ссылка. Пусто — использовать последний известный аватар платформы.",
 			avatarChoose: "Выбрать изображение…",
@@ -60,6 +66,8 @@ window.__ModuleLoader__.load({
 			useLink: "Вместо файла — ссылка",
 			uploadedImage: "Загруженное изображение",
 			avatarClear: "Убрать изображение",
+			idLabel: "ID аккаунта (необязательно)",
+			idHint: "Используется для предзаполнения формы Feedback. Обычно не заполняется.",
 			save: "Сохранить",
 			saving: "Сохранение…",
 			saved: "Сохранено",
@@ -321,6 +329,15 @@ window.__ModuleLoader__.load({
 						onChange: setField("name"),
 						placeholder: t("nameLabel"),
 					})),
+					fieldBlock(t("contactLabel"), t("contactHint"), h("input", {
+						key: "contact",
+						style: styles.input,
+						type: "text",
+						value: draft.contact,
+						disabled: !writable || saving,
+						onChange: setField("contact"),
+						placeholder: t("contactLabel"),
+					})),
 					fieldBlock(t("avatarLabel"), t("avatarHint"), h("div", { style: styles.avatarRow, key: "avatar" }, [
 						avatarPreview,
 						(isStoredAvatar(draft.avatarUrl) || isInlineAvatar(draft.avatarUrl))
@@ -369,6 +386,15 @@ window.__ModuleLoader__.load({
 							onClick: () => setDraft((previous) => ({ ...previous, avatarUrl: "" })),
 						}, t("avatarClear")),
 					])),
+					fieldBlock(t("idLabel"), t("idHint"), h("input", {
+						key: "id",
+						style: styles.input,
+						type: "text",
+						value: draft.id,
+						disabled: !writable || saving,
+						onChange: setField("id"),
+						placeholder: t("idLabel"),
+					})),
 				]),
 				h("div", { style: styles.actions, key: "actions" }, [
 					h("button", {
